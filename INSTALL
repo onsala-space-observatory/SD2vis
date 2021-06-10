@@ -1,0 +1,25 @@
+STEPS TO INSTALL THE SD2VIS TASK INTO CASA
+
+1.- Untar this file into a directory of your choice 
+    (e.g., $HOME/.casa/NORDIC_TOOLS)
+
+2.- cd $HOME/.casa/NORDIC_TOOLS
+
+3.- Run "buildmytasks" in that directory.
+
+4.- Edit the file $HOME/.casa/init.py
+    Add the line:
+    
+       execfile('$HOME/.casa/NORDIC_TOOLS/mytasks.py')
+
+5.- That's it! You should be able to run the new task in CASA!
+    Just doing:
+ 
+         task SD2vis   or   tget SD2vis
+
+    should load the task.
+
+
+Any comment, suggestion or bug report can be sent to:
+
+contact@nordic-alma.se

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" ?>
+
+<casaxml xmlns="http://casa.nrao.edu/schema/psetTypes.html"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
+file:///opt/casa/code/xmlcasa/xml/casa.xsd">
+
+<task type="function" name="SD2vis" category="analysis">
+
+  <shortdescription>Version 1.4. Generates synthetic visibilities based on a Total-Power (Single Dish) image. This task is thought for pre-deconvolution combination of SD and interferometry data.</shortdescription>
+      
+  <description>Version 1.4. Generates synthetic visibilities based on a Total-Power (Single Dish) image. This task is thought for pre-deconvolution combination of SD and interferometry data.</description>
+
+
+<input>
+
+    <param type="string" name="SDimage" mustexist="true">
+      <description>Total-Power (i.e., Single Dish) CASA image.</description>
+      <value></value>
+    </param>
+
+    <param type="any" name="SDchannels" mustexist="false">
+      <description>List of two integers, which give the range of spectral channels (in the image) that will be converted into visibilities. If not a 2-element list, the whole image is taken.</description>
+      <value>-1</value>
+    </param>
+
+<!--    <param type="any" name="NuReGrid" mustexist="false">
+      <description>Desired frequency configuration of the synthetic data. This is a list of two floats and one integer (i.e., [Nu0, DNu, Nchan]). Default (i.e., an empty list) means to use the same frequency gridding as the input image. If not default, SD2vis will regrid the input image, so that the initial frequency is NureGrid[0] (in Hz), the channel width is NuReGrid[1] (also in Hz) and the number of channels is NuReGrid[2]. Using this keyword may be useful if the user wants an *exact match* between the spws from SD2vis and those from the interferometric data. \n\nNOTE: regridding does NOT average channels (it only interpolates), so if the final resolution is much lower than the original resolution, you may want to run specsmooth first.</description>
+      <value>[]</value>
+    </param>
+
+-->
+
+    <param type="any" name="SDbaseline" mustexist="false">
+      <description>Maximum baseline for Total-Power visibilities (ideally, the antenna diameter, but lower values may work better sometimes).</description>
+      <value>7.0</value>
+    </param>
+
+    <param type="any" name="nSDvis" mustexist="false">
+      <description>Approximate number of visibilities (per pointing) in synthetic dataset (the minimum that is used anyway is about 50 times the number of pointings in inputvis).</description>
+      <value>500</value>
+    </param>
+
+    <param type="string" name="inputvis" mustexist="false">
+      <description>Measurement set with the visibilities that are going to be concatenated with the Total-Power data. This is used to set the appropriate weights to the Total-Power visibilities, and to set the pointings (which will be the same as those in inputvis).</description>
+      <value></value>
+    </param>
+
+    <param type="string" name="field" mustexist="false">
+      <description>Name of the target field (as it appears in the inputvis).</description>
+      <value></value>
+    </param>
+
+    <param type="int" name="inputspw" mustexist="false">
+      <description>Spectral window (of inputvis) that will be used in the Total-Power + interferometry imaging. This is used to set the appropriate weights (and/or scaling factor) to the Total-Power visibilities.</description>
+      <value>0</value>
+    </param>
+
+    <param type="any" name="inputchan" mustexist="false">
+      <description>Range of channels with strong line emission, which will be used to compute the Total-Power / interferometry scaling and weights. If just one integer is given, only that channel is selected, unless the integer is negative (in that case, the whole spw is selected). Default means to take the whole spw.</description>
+      <value>-1</value>
+    </param>
+
+    <param type="any" name="wgtfac" mustexist="false">
+      <description>Ratio between the total weight of the interferometric visibilities and the total weight of the Total-Power-based synthetic visibilities. High values will over-weight the Total-Power data.</description>
+      <value>1.0</value>
+    </param>
+
+    <param type="any" name="over_resolve" mustexist="false">
+      <description>Over-resolution factor when unconvolving the Total-Power image (from the Total-Power beam). Default value will use the exact beam given in the header of the Total-Power image. Higher values will unconvolve narrower beams (i.e., over-resolve).</description>
+      <value>1.0</value>
+    </param>
+
+    <param type="any" name="scale" mustexist="false">
+      <description>Scaling factor for the amplitudes of the Total-Power data. If you set over_resolve != 1.0, you should set scale = 1./(over_resolve)**2, to conserve the total flux density in the image. If scale is negative, the scaling factor will be derived automatically, by comparing baselines shorter than abs(scale) (in meters). E.g., if scale = -12.0, all baselines shorter than 12m will be used to estimate the scaling factor between the Total Power and the interferometric data. </description>
+      <value>1.0</value>
+    </param>
+
+    <param type="string" name="outputvis" mustexist="false">
+      <description>Name of output measurement set (if it exists, it will be overwritten)</description>
+      <value>TP2vis.ms</value>
+    </param>
+
+
+    <param type="bool" name="Python_DFT" mustexist="false">
+      <description>If a FITS file is used, it is possible to encounter a (quite) silly CASA error related to the sm tool. In such a case, set this to True, so that SD2vis will compute the DFT by itself (much slower approach, since it has to use some Python loops). Notice, though, that you may encounter problems with the Primary Beam correction (due to another CASA limitation, related to hardcoded PBs) when Python_DFT=True</description>
+      <value>False</value>
+    </param>
+
+
+
+</input>
+
+  <returns type="bool"/>
+
+  <example>
+
+This task reads a Single Dish image, unconvolves the Primary Beam (by applying an FFT-based filter), and generates a synthetic measurement set with baselines distributed following a random Gaussian distribution in UV space. This distribution is centered at the origin and has a width similar to the FT of the Single Dish aperture. 
+
+The visibility values are computed using Direct Fourier Transform, as coded in the sm tool (or directly using Python code, if the sm tool fails, as it usually happens when dealing with FITS image files).
+
+The output of this task can then be concatenated to an interferometric dataset, for a proper deconvolution.
+
+The user is asked to check the synthetic visibilities with plotms, prior to the concatenation, to check for possible problems or artifacts. For instance, if the beam information given in the header of the image is slightly wider than the true convolving beam in the image, the user will see that the visibilities may INCREASE as a function of baseline length, especially for the longest baselines (i.e., close to SDbaseline). If that is the case, the user can fine-tune the beam deconvolution in the image by setting the "over_resolve" keyword.
+
+ 
+
+</example>
+</task>
+
+</casaxml>
+
+

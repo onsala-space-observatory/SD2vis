@@ -1,0 +1,5 @@
+*.pyc
+mytasks.py
+SD2vis.py
+SD2vis_cli.py
+*~

@@ -7,8 +7,8 @@ xsi:schemaLocation="http://casa.nrao.edu/schema/casa.xsd
 file:///opt/casa/code/xmlcasa/xml/casa.xsd">
 
   <task type="function" name="SD2vis" category="analysis">
-    <shortdescription>Version 1.4. Generates synthetic visibilities based on a Total-Power (Single Dish) image. This task is thought for pre-deconvolution combination of SD and interferometry data.</shortdescription>
-    <description>Version 1.4. Generates synthetic visibilities based on a Total-Power (Single Dish) image. This task is thought for pre-deconvolution combination of SD and interferometry data.</description>
+    <shortdescription>Generates synthetic visibilities based on a Total-Power (Single Dish) image. This task is thought for pre-deconvolution combination of SD and interferometry data.</shortdescription>
+    <description>Generates synthetic visibilities based on a Total-Power (Single Dish) image. This task is thought for pre-deconvolution combination of SD and interferometry data.</description>
     <input>
       <param type="string" name="SDimage" mustexist="true">
 	<description>Total-Power (i.e., Single Dish) CASA image.</description>

@@ -11,18 +11,15 @@ Steps to install the `SD2vis` task into `casa`
 cd $HOME/.casa/NordicTools
 git clone <repository url>
 cd SD2vis
-buildmytasks
+buildmytasks --module fakeobs SD2vis.xml
 ```
- 2. Edit the file `$HOME/.casa/init.py`. Add the line:
+ 2. Inside `casa` add the folder to your `PYTHONPATH`:
 
-``` shell
-execfile('$HOME/.casa/NordicTools/SD2vis/mytasks.py')
-```
+``` python
+CASA <1>: sys.path.insert(0, <path to SD2vis folder>)
+CASA <2>: from SD2vis.gotasks.SD2vis import SD2vis
+CASA <3>: inp(SD2vis)
 
-That's it! You should be able to run the new task in CASA! Just doing:
-
-``` shell
-tget SD2vis
 ```
 
-inside `casa` should load the task. To get help, just type `help SD2vis`
+That's it! Enjoy!

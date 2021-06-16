@@ -122,12 +122,12 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
 
     def printMsg(msg):
         """Print message on terminal and log"""
-        print msg
+        print(msg)
         casalog.post('SD2vis: '+msg)
 
     def printErr(msg):
         """Same as printMsg, but raise an exception afterwards"""
-        print msg
+        print(msg)
         casalog.post('SD2vis ERROR: '+msg)
         raise Exception(msg)
 
@@ -177,8 +177,7 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
             printMsg('Will regrid image to Nu0: %.8e GHz, dNu: %.8e MHz and %i channels' % (
                 NuReGrid[0]/1.e9, NuReGrid[1]/1.e6, NuReGrid[2]))
         except:
-            printErr(
-                'BAD NuReGrid. It should ba a list of two floats and an integer')
+            printErr('BAD NuReGrid. It should ba a list of two floats and an integer')
 
         ia.open(SDimage)
         mycs = ia.coordsys()

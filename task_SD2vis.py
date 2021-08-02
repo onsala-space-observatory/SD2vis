@@ -176,7 +176,7 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
         try:
             printMsg('Will regrid image to Nu0: %.8e GHz, dNu: %.8e MHz and %i channels' % (
                 NuReGrid[0]/1.e9, NuReGrid[1]/1.e6, NuReGrid[2]))
-        except:
+        except Exception:
             printErr(
                 'BAD NuReGrid. It should ba a list of two floats and an integer')
 
@@ -204,7 +204,7 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
         importfits(fitsimage='%s.COPY' %
                    SDimage, imagename='SD2VIS.TEMP', overwrite=True)
         printMsg('Imported FITS')
-    except:  # A CASA IMAGE?
+    except Exception:  # A CASA IMAGE?
         os.system('cp -r %s.COPY SD2VIS.TEMP' % (SDimage))
 
     os.system('rm -rf %s.UNCONVOLVED' % SDimage)
@@ -224,7 +224,6 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
         ia.close()
         printErr('\n\nERROR! Odd Frequency Axis!\n\n')
 
-    #  ia.close()
     ia.open('%s.UNCONVOLVED' % SDimage)
     data = ia.getchunk()
     data[np.isnan(data)] = 0.0  # Unset masked pixels
@@ -233,15 +232,12 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
 
     source = str(field).replace(' ', '_')
 
-    #  ia.close()
     ndim = len(summ['shape'])
     NPIX = summ['shape'][:2]
     INCR = [ic*units[summ['axisunits'][0]]/units['rad']
             for ic in summ['incr'][:2]]
 
     nudim = 3  # list(summ['axisnames']).index('Frequency')
-    #  if nudim not in [2,3]:
-    #    printErr('THIS IS NOT AN IMAGE CUBE!')
     Freqs = (np.arange(summ['shape'][nudim]) + summ['refpix']
              [nudim])*summ['incr'][nudim]+summ['refval'][nudim]
 
@@ -249,7 +245,7 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
         try:
             Freqs = Freqs[np.min(SDchannels):np.max(SDchannels)+1]
             SDchans = [SDchannels[0], SDchannels[1]+1]
-        except:
+        except Exception:
             printErr('BAD CHANNEL RANGE FOR IMAGE!')
     else:
         SDchans = [0, len(Freqs)]
@@ -259,7 +255,7 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
     try:
         stdim = list(summ['axisnames']).index('Stokes')
         nst = summ['shape'][stdim]
-    except:
+    except Exception:
         stdim = 0
         nst = 0
 
@@ -293,7 +289,6 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
     # FFT of model:
     datfft = np.zeros(np.shape(data), dtype=np.complex128)
     for sti in range(nst):
-        #    if nudim==3:
         for i in range(SDchans[0], SDchans[1]):
             datfft[:, :, sti, i] = np.fft.fftshift(
                 np.fft.fft2(data[:, :, sti, i]))
@@ -314,16 +309,13 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
                          int(summ['shape'][1]), endpoint=False)
         Vones = np.ones(summ['shape'][0])
 
-        Q2 = (np.power(np.outer(UU, Uones), 2.) +
-              np.power(np.outer(Vones, VV), 2.))
-
+        Q2 = (np.power(np.outer(UU, Uones), 2.) + np.power(np.outer(Vones, VV), 2.))
         Q2[Q2 > MaxQ2] = 0.0
 
         UVTaper = np.exp(Fsigma*Q2/(over_resolve**2.))/(Fsigma/np.pi)*psize**2.
         UVTaper[Q2 > MaxQ2] = 0.0
 
         for sti in range(nst):
-            #      if nudim==3:
             for i in range(SDchans[0], SDchans[1]):
                 data[:, :, sti, i] = np.fft.ifft2(
                     np.fft.ifftshift(datfft[:, :, sti, i]*UVTaper)).real
@@ -376,7 +368,6 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
     Dec = summ['refval'][1]
     arc = summ['axisunits'][0]
 
-    #####################
     # Set pointings:
     if len(inputvis) > 0:
         tb.open(os.path.join(inputvis, 'FIELD'))
@@ -394,7 +385,6 @@ def SD2vis(SDimage='', SDchannels=-1,  # NuReGrid=[],
         printMsg('WARNING! No inputvis given! Only one pointing will be used!')
         NPOINT = 1
         Pointings = ['%.16f%s %.16f%s' % (RA, arc, Dec, arc)]
-    #####################
 
     for i in range(NPOINT):
         sm.setfield(sourcename='%s_%i' % (source, i), sourcedirection=Pointings[i],
